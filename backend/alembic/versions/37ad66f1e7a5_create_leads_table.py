@@ -5,7 +5,6 @@ Revises:
 Create Date: 2021-05-04 15:32:34.423571
 
 """
-from alembic import op
 from sqlalchemy import text
 
 from api.db import db
@@ -20,12 +19,17 @@ depends_on = None
 
 def upgrade():
     with db.get_connection() as conn:
+        # conn.execute(text(
+        #     """
+        #     CREATE SCHEMA IF NOT EXISTS api;
+        #     """
+        # ))
         conn.execute(text(
             """
-            CREATE TABLE IF NOT EXISTS api.leads (
+            CREATE TABLE IF NOT EXISTS leads (
                 id SERIAL PRIMARY KEY NOT NULL,
-                company_name VARCHAR(100) NOT NULL,
-                company_address VARCHAR(100),
+                company_name VARCHAR(500) NOT NULL,
+                company_address VARCHAR(500),
                 contact_name VARCHAR(100),
                 formation_date DATE,
                 website VARCHAR(100),
@@ -49,6 +53,6 @@ def downgrade():
     with db.get_connection() as conn:
         conn.execute(
             """
-                DROP TABLE api.leads;
+                DROP TABLE leads;
             """
         )

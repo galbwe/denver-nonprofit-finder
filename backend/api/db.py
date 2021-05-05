@@ -5,16 +5,17 @@ from sqlalchemy import create_engine
 
 class DatabaseClient:
 
-    def __init__(self, db, user, host, port, dialect="postgresql"):
+    def __init__(self, db, user, password, host, port, dialect="postgresql"):
         self.db = db
         self.user = user
+        self.password = password
         self.host = host
         self.port = port
         self.dialect = dialect
 
     @property
     def connection_string(self):
-        return f"{self.dialect}://{self.user}@{self.host}:{self.port}/{self.db}"
+        return f"{self.dialect}://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
 
     def get_engine(self):
         return create_engine(self.connection_string)
@@ -28,6 +29,7 @@ def create_database_client():
         return DatabaseClient(
             os.environ['POSTGRES_DB'],
             os.environ['POSTGRES_USER'],
+            os.environ['POSTGRES_PASSWORD'],
             os.environ['POSTGRES_HOST'],
             os.environ['POSTGRES_PORT'],
         )
