@@ -28,6 +28,7 @@ class SocrataBusinessEntity:
 
 
 DATE_FORMAT = '%Y-%m-%d'
+# TODO: create a task that normalizes dates in database
 
 
 @dataclass

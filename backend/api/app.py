@@ -26,6 +26,7 @@ def leads_collection_view():
 
 # TODO: get these from a model
 DEFAULT_LEAD_FIELDS = (
+    'id',
     'company_name',
     'company_address',
     'formation_date',
@@ -48,6 +49,7 @@ MAX_PAGE_SIZE = 1000
 
 
 def _get_all_leads(request):
+    # TODO: refactor by splitting into helper functions
     # parse query params
     # TODO: add search parameter
     # TODO: add filters
@@ -124,7 +126,30 @@ def _get_all_leads(request):
 
 
 def _create_new_lead(request):
-    return "create_new_lead"
+    # parse body params
+    body = {
+        field: value
+        for (field, value) in request.get_json().items()
+        if field != 'id' and field in DEFAULT_LEAD_FIELDS and value is not None
+    }
+    # insert into leads table
+    # TODO: handle database error
+    with db.get_engine().begin() as connection:
+        row = connection.execute(
+            text("""
+                INSERT INTO leads ({columns})
+                VALUES ({placeholders})
+                RETURNING *;
+                """.format(
+                    columns=','.join(body.keys()),
+                    placeholders=','.join(f':{column}' for column in body.keys()),
+            )),
+            **body,
+        ).first()
+    return {
+        field: getattr(row, field)
+        for field in DEFAULT_LEAD_FIELDS
+    }
 
 
 @app.route('/leads/<int:id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
