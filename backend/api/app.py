@@ -7,6 +7,9 @@ from .db import db
 app = Flask(__name__)
 
 
+# TODO: return request metadata as part of responses
+
+
 @app.route('/healthcheck')
 def healthcheck():
     return "healthy", 200
@@ -91,6 +94,7 @@ def _get_all_leads(request):
                 SELECT
                     {columns}
                 FROM LEADS
+                ORDER BY id
                 LIMIT :limit
                 OFFSET :offset;
             """.format(
@@ -152,8 +156,99 @@ def _create_new_lead(request):
     }
 
 
-@app.route('/leads/<int:id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def lead_view():
-    # TODO: implement lead_view
-    return "lead_view"
+@app.route('/leads/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+def lead_view(id):
+    if request.method == 'GET':
+        return _get_lead_by_id(id)
+    elif request.method == 'PUT':
+        return _modify_lead_with_id(id, request)
+    elif request.method == 'DELETE':
+        return _delete_lead_with_id(id)
+    return {
+        "message": "Unknown http method"
+    }, 404
 
+
+def _get_lead_by_id(id: int):
+    # TODO: add include parameter for filtering on columns
+    with db.get_connection() as connection:
+        row = connection.execute(
+            text("""
+                SELECT {columns} FROM leads
+                WHERE id = :id
+            """.format(
+                columns=','.join(DEFAULT_LEAD_FIELDS)
+            )),
+            id=id,
+        ).first()
+    if row is None:
+        return {
+            "params": {
+                "id": id,
+            },
+            "message": "Could not find lead with given id."
+        }, 404
+    return {
+        field: getattr(row, field)
+        for field in DEFAULT_LEAD_FIELDS
+    }, 200
+
+
+def _modify_lead_with_id(id: int, request):
+    body = {
+        field: value
+        for (field, value) in request.get_json().items()
+        if field != 'id' and field in DEFAULT_LEAD_FIELDS
+    }
+    with db.get_engine().begin() as connection:
+        row = connection.execute(
+            text("""
+                UPDATE leads
+                SET {updates}
+                WHERE id = :id
+                RETURNING *;
+            """.format(
+                updates=",".join(f"{field}=:{field}" for field in body.keys())
+            )),
+            id=id,
+            **body,
+        ).first()
+
+    if row is None:
+        return {
+            "params": {
+                "id": id,
+            },
+            "body": request.get_json(),
+            "message": "Could not find lead with given id."
+        }, 404
+
+    return {
+        field: getattr(row, field)
+        for field in DEFAULT_LEAD_FIELDS
+    }, 200
+
+
+def _delete_lead_with_id(id: int):
+    with db.get_engine().begin() as connection:
+        row = connection.execute(
+            text("""
+                DELETE FROM leads
+                WHERE id = :id
+                RETURNING *;
+            """),
+            id=id,
+        ).first()
+
+    if row is None:
+        return {
+            "params": {
+                "id": id,
+            },
+            "message": "Could not find lead with given id."
+        }, 404
+
+    return {
+        field: getattr(row, field)
+        for field in DEFAULT_LEAD_FIELDS
+    }
