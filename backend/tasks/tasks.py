@@ -1,19 +1,12 @@
+import os
 from typing import Optional
 from dataclasses import dataclass
 from datetime import datetime
 
 import requests
-from celery import Celery
 from sqlalchemy import text
 
 from api.db import db
-
-
-app = Celery(
-    'tasks',
-    backend='redis://localhost',
-    broker='pyamqp://admin:mypass@localhost:5672//',
-)
 
 
 @dataclass
@@ -54,11 +47,15 @@ class Lead:
         return self.formation_date.strftime(DATE_FORMAT)
 
 
-@app.task
 def find_socrata_api_leads(perpage=500, page=1) -> int:
     inserted = 0
     res = requests.get(
         _socrata_url(perpage, (page - 1) * perpage))
+    if res.status_code != 200:
+        print(f'Received response status code of {res.status_code}.')
+        print(res.headers)
+        print(res.json())
+        return 0
     # TODO: catch request exceptions
     business_entities = (
         SocrataBusinessEntity(
