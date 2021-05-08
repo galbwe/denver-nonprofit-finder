@@ -7,8 +7,11 @@ import {
   Layer,
   ResponsiveContext,
 } from 'grommet';
-import { FormClose, Notification } from 'grommet-icons';
-import React, { useState } from 'react';
+import { Checkmark, FormClose, Notification } from 'grommet-icons';
+import React, { useEffect, useState } from 'react';
+
+import LeadCard from '../LeadCard/LeadCard'
+import QueryEditor from '../QueryEditor/QueryEditor'
 
 // TODO: install prettier
 
@@ -16,6 +19,7 @@ const theme = {
   global: {
     colors: {
       brand: '#e14e54',
+      secondary: '#grey',
     },
     font: {
       family: 'Roboto',
@@ -43,6 +47,18 @@ const AppBar = (props) => {
 
 const App = () => {
   const [showSidebar, setShowSidebar] = useState(false);
+  const [query, setQuery] = useState({
+    page: 1,
+    perpage: 4,
+  })
+  const [leads, setLeads] = useState([]);
+
+  // fetch leads data from api
+  useEffect(() => {
+    return fetch(`http://localhost:8000/leads?page=${query.page}&perpage=${query.perpage}&drop_null=false`)
+    .then(res => res.json())
+    .then(data => setLeads(data.leads))
+  }, [query])
 
   return (
     <Grommet theme={theme} full>
@@ -60,9 +76,22 @@ const App = () => {
                 }}
               />
             </AppBar>
+            <QueryEditor
+                query={query}
+                onSubmit={setQuery}
+            />
+            <Box flex direction="column" overflow={{ horizontal: 'hidden' }}>
+              {/* app body */}
+              { leads && (
+                leads.map(lead =>
+                  <LeadCard
+                    companyName={lead.company_name}
+                    formationDate={lead.formation_date}
+                    companyAddress={lead.company_address}
+                  />
+                ))
+              }
 
-            <Box direction="row" flex overflow={{ horizontal: 'hidden' }}>
-              app body
             </Box>
             {(size !== 'small' || !showSidebar) ? (
               <Collapsible direction="horizontal" open={showSidebar}>

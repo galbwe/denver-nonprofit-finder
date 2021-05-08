@@ -1,10 +1,18 @@
+import os
+
 from flask import Flask, request
+from flask_cors import CORS
 from sqlalchemy import text
 
 from .db import db
 
 
 app = Flask(__name__)
+
+
+if os.environ.get('ALLOW_CORS', 'false').lower() == 'true':
+    # for localhost development only
+    CORS(app)
 
 
 # TODO: return request metadata as part of responses

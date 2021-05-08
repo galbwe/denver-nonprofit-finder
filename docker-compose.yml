@@ -18,6 +18,7 @@ services:
             - POSTGRES_DB=cfd_partner_finder
             - POSTGRES_HOST=postgres
             - POSTGRES_PORT=5432
+            - ALLOW_CORS=true
         ports:
             - "8000:8000"
         depends_on:

@@ -6,8 +6,6 @@ COPY requirements-prod.txt .
 RUN pip install --upgrade pip &&\
     pip install -q --no-cache-dir -r requirements-prod.txt
 
-COPY ./celery.conf /etc/supervisor/conf.d/celery.conf
-
 COPY . .
 
 RUN pip install -e .
