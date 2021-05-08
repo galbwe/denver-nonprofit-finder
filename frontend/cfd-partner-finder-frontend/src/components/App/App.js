@@ -12,8 +12,13 @@ import React, { useEffect, useState } from 'react';
 
 import LeadCard from '../LeadCard/LeadCard'
 import QueryEditor from '../QueryEditor/QueryEditor'
+import { config } from '../../config'
+import dotenv from 'dotenv';
 
-// TODO: install prettier
+console.log('NODE_ENV: ', process.env.NODE_ENV)
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
 
 const theme = {
   global: {
@@ -55,7 +60,7 @@ const App = () => {
 
   // fetch leads data from api
   useEffect(() => {
-    return fetch(`http://localhost:8000/leads?page=${query.page}&perpage=${query.perpage}&drop_null=false`)
+    return fetch(`${config.backendHost}/leads?page=${query.page}&perpage=${query.perpage}&drop_null=false`)
     .then(res => res.json())
     .then(data => setLeads(data.leads))
   }, [query])
