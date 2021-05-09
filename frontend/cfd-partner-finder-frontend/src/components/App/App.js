@@ -67,7 +67,7 @@ const Leads = () => {
 
 const Lead = () => {
   let { id } = useParams();
-  return <LeadDetail id={id} />;
+  return <LeadDetail key={`lead-detail-${id}`} id={id} />;
 };
 
 export default App;
