@@ -6,10 +6,13 @@ import {
   useRouteMatch,
 } from 'react-router-dom';
 
+import CreateLead from '../CreateLead/CreateLead';
 import { Grommet } from 'grommet';
 import Home from '../Home/Home';
 import LeadDetail from '../LeadDetail/LeadDetail';
 import React from 'react';
+
+;
 
 const theme = {
   global: {
@@ -29,18 +32,11 @@ const App = () => {
   return (
     <Grommet theme={theme} full>
       <Router>
-        {/* <div>
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/leads">Leads</Link>
-          </li>
-        </ul>
-      </div> */}
 
         <Switch>
+          <Route path="/create-lead">
+            <CreateLead />
+          </Route>
           <Route path="/leads">
             <Leads />
           </Route>
@@ -55,6 +51,8 @@ const App = () => {
 
 const Leads = () => {
   let match = useRouteMatch();
+
+  console.log('match.path: ', match.path)
 
   return (
     <Switch>

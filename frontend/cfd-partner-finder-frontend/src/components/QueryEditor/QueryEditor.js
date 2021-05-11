@@ -1,6 +1,9 @@
 import { Box, Button, TextInput } from 'grommet';
 import React, { useState } from 'react';
 
+import { Add } from 'grommet-icons';
+import { Link } from 'react-router-dom';
+
 const QueryEditor = ({query, onSubmit}) => {
   const [tempQuery, setTempQuery] = useState(query);
 
@@ -55,6 +58,13 @@ const QueryEditor = ({query, onSubmit}) => {
             vertical: "medium"
         }}
       />
+      <Link to="/leads/create">
+        <Button
+          icon={< Add />}
+          label={ "New" }
+        />
+      </Link>
+
     </Box>
   );
 };
